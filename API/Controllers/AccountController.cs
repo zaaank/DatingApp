@@ -10,10 +10,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
+    [Route("api/account")]
     public class AccountController : BaseApiController
     {
         private readonly DataContext _context;
         private readonly ITokenService _tokenService;
+        
         public AccountController(DataContext context, ITokenService tokenService)
         {
             _tokenService = tokenService;
