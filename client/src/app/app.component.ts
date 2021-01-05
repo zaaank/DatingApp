@@ -11,7 +11,7 @@ import { AccountService } from './_services/account.service';
 export class AppComponent implements OnInit {
   title = 'The Dating app';
   users: any;
-  arr = ['sasa','asdas','sadas'];
+
   constructor(private accountService: AccountService) {}
 
   ngOnInit() {
