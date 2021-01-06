@@ -18,6 +18,7 @@ namespace API.Helpers
                     src => src.DateOfBirth.CalculateAge() //CalculateAge is method from Extensions -> DateTimeExtensions
                 ) );
             CreateMap<Photo, PhotoDto>();
+            CreateMap<MemberUpdateDto, AppUser>();
         }
     }
 }

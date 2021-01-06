@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
@@ -36,6 +37,20 @@ namespace API.Controllers
         {
             return await _userRepository.GetMemberAsync(username);
             //ienumerable je podobno kot list
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto){
+            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = await _userRepository.GetUserByUsernameAsync(username);
+
+            _mapper.Map(memberUpdateDto, user); //iz memberupdatedto bo vse prepisalo na userja namesto da za vsak property delaš ročno
+
+            _userRepository.Update(user);
+
+            if(await _userRepository.SaveAllAsync()) return NoContent();
+
+            return BadRequest("Failed to update user");
         }
 
     }
