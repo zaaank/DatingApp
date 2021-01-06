@@ -12,6 +12,8 @@ namespace API.Extensions
     public static class ApplicationServiceExtensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config){
+
+            services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings")); //cloudinarysettings is the name we gave in aoosettings.json
             services.AddScoped<ITokenService, TokenService>(); //scoped last as long as http request last
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
