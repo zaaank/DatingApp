@@ -7,6 +7,7 @@ using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
+
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -15,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    [Authorize]
+     //[Authorize]
     public class UsersController : BaseApiController
     {
         private readonly IUserRepository _userRepository;
@@ -36,11 +37,74 @@ namespace API.Controllers
 
             return Ok(users);
         }
-        [HttpGet("{username}", Name = "GetUser")]
+ [HttpGet]
+ [Route("usersSmall")]
+        public async Task<ActionResult<IEnumerable<MemberSmallDto>>> GetUsersSamll()
+        {
+            //ienumerable je podobno kot list
+            var users = await _userRepository.GetMembersAsync();
+            var usersSmall = users.Select(u => new MemberSmallDto{
+                ID = u.Id,
+                Name = u.Username,
+                Age = u.Age,
+                City = u.City,
+                Country = u.Country
+            });
+            return Ok(usersSmall);
+        }
+
+        [HttpGet("{username}", Name = "GetUser")]        
         public async Task<ActionResult<MemberDto>> GetUser(string username)
         {
             return await _userRepository.GetMemberAsync(username);
             //ienumerable je podobno kot list
+        }
+
+         [HttpGet]  
+          [Route("Select")]
+          [AllowAnonymous]
+        public List<SelectItem> GetUserSelect()
+        {
+             var mombers =  _userRepository.GetMembersAsync().Result;
+        
+            return mombers.Select(m => new SelectItem{
+                ID = m.Id,
+                Name = m.Username
+            }).ToList();
+
+
+            //ienumerable je podobno kot list
+        }
+
+ [HttpPost]
+ [Route("update")]
+        public async Task<ActionResult> UpdateMultipleUsers(Dictionary<string, object> request)
+        {
+
+            var myUsers =(List<MemberSmallDto>) request["usersTable"];
+
+            var allUsers = _userRepository.GetUsersAsync().Result;
+
+            var updatedUSers = allUsers.Join(
+                myUsers,
+                cur => cur.Id,
+                upd => upd.ID,
+                (cur, upd) => {
+                    cur.UserName = upd.Name;
+                    cur.Country = upd.Country;
+                    return cur;
+                    }
+            );
+
+        foreach (AppUser item in updatedUSers)
+        {
+            _userRepository.Update(item);
+        }
+
+
+           
+
+            return BadRequest("Failed to update user");
         }
 
         [HttpPut]

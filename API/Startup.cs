@@ -20,6 +20,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Serialization;
+using Newtonsoft;
 
 namespace API
 {
@@ -36,14 +38,21 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         { //order not important
+
             services.AddApplicationServices(_config);
             services.AddIdentityServices(_config);
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+    });
+            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
             services.AddCors();
+
+
             
         }
 
@@ -52,11 +61,18 @@ namespace API
         {
             app.UseMiddleware<ExceptionMiddleware>();
 
-            app.UseHttpsRedirection(); //to redirect from http-> https
+           // app.UseHttpsRedirection(); //to redirect from http-> https
 
             app.UseRouting();
-
-            app.UseCors(x=>x.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
+            app.UseSwagger();
+// Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+// specifying the Swagger JSON endpoint.
+app.UseSwaggerUI(c =>
+{
+c.SwaggerEndpoint("swagger/v1/swagger.json", "My API V1");
+c.RoutePrefix = string.Empty;
+});
+            app.UseCors(x=>x.AllowAnyHeader().AllowAnyMethod());
     //you can do any of headers and methods if the origin is localhsot 4200
             app.UseAuthentication();
 
